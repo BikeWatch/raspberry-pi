@@ -1,6 +1,6 @@
 import serial
 
-supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "time", "uuid"]
+supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "speed", "time", "uuid"]
 
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1000)
