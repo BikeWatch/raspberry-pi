@@ -1,7 +1,7 @@
 import serial
 import requests
 
-base_api_url = ""
+base_api_url = "https://bikewatch-functions.azurewebsites.net/api/"
 active_uuid = ""
 supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "speed", "time", "uuid"]
 dataset = []
@@ -9,7 +9,7 @@ dataset = []
 
 def set_uuid(uuid):
     global active_uuid
-    if active_uuid is not uuid:
+    if active_uuid != uuid:
         print("uuid changed")
         active_uuid = uuid.replace(" ", "-")
 
@@ -27,25 +27,34 @@ def get_data_from_arduino():
                 value = item[1].replace(" |", "")
                 if data_type in supported_types:
                     if data_type == "uuid":
-                        set_uuid(data[data_type])
+                        set_uuid(value)
                     else:
                         data[data_type] = value
-            dataset.append(data)
+            if active_uuid != "":
+                dataset.append(data)
 
 
 def send_data_to_server():
     global dataset
+
+    if active_uuid == "":
+        return
+
+    print(f'{base_api_url}StoreTelemetric')
     print({
-        "uuid": active_uuid,
-        "telemetric": dataset
+         "uuid": active_uuid,
+         "telemetric": dataset
     })
-    r = requests.post(base_api_url + "/StoreTelemetric", {
-        "uuid": active_uuid,
-        "telemetric": dataset
-    })
-    if r.status_code == 201:
-        print("Data has been send to server")
-        dataset = []
+    # r = requests.post(
+    #     f'{base_api_url}StoreTelemetric', {
+    #     "uuid": active_uuid,
+    #     "telemetric": dataset
+    # })
+    # print(r.status_code)
+    # if r.status_code == 201:
+    #     print("Data has been send to server")
+    #     dataset = []
+    # dataset = []
 
 
 def loop():
