@@ -1,5 +1,7 @@
 import serial
+import requests
 
+base_api_url = ""
 active_uuid = ""
 supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "speed", "time", "uuid"]
 dataset = []
@@ -31,9 +33,26 @@ def get_data_from_arduino():
             dataset.append(data)
 
 
+def send_data_to_server():
+    global dataset
+    print({
+        "uuid": active_uuid,
+        "telemetric": dataset
+    })
+    r = requests.post(base_api_url + "/StoreTelemetric", {
+        "uuid": active_uuid,
+        "telemetric": dataset
+    })
+    if r.status_code == 201:
+        print("Data has been send to server")
+        dataset = []
+
+
 def loop():
     get_data_from_arduino()
-    
+    if len(dataset) >= 20:
+        send_data_to_server()
+
 
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1000)
