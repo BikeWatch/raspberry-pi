@@ -1,6 +1,15 @@
 import serial
 
+active_uuid = ""
 supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "speed", "time", "uuid"]
+
+
+def set_uuid(uuid):
+    global active_uuid
+    if active_uuid is not uuid:
+        print("uuid changed")
+        active_uuid = uuid.replace(" ", "-")
+
 
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1000)
