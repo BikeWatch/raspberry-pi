@@ -3,6 +3,7 @@ import requests
 import ast
 import json
 
+ser = None
 base_api_url = "https://bikewatch-functions.azurewebsites.net/api/"
 active_uuid = ""
 supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "speed", "time", "uuid"]
@@ -62,7 +63,7 @@ def send_data_to_server():
     if r.status_code == 201:
         print("Data has been send to server")
         dataset = []
-    #dataset = []
+    # dataset = []
 
 
 def loop():
@@ -71,9 +72,19 @@ def loop():
         send_data_to_server()
 
 
-if __name__ == '__main__':
-    ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1000)
-    ser.flush()
+def initialize_serial():
+    global ser
+    try:
+        ser = serial.Serial('/dev/ttyUSB0', 115200, timeout=1000)
+        ser.flush()
+    except:
+        print("Failed to initialize serial connection to arduino")
+        input("Press enter to continue")
+        initialize_serial()
 
+
+if __name__ == '__main__':
+    initialize_serial()
     while True:
-        loop()
+        if ser is not None:
+            loop()
