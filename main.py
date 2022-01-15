@@ -3,7 +3,7 @@ import requests
 import ast
 import json
 
-ser = None
+ser = serial.Serial()
 base_api_url = "https://bikewatch-functions.azurewebsites.net/api/"
 active_uuid = ""
 supported_types = ["roll", "pitch", "lat", "long", "alt", "date", "speed", "time", "uuid"]
@@ -33,15 +33,18 @@ def get_data_from_arduino():
             print(line)
         else:
             for i in line.split(' | '):
-                item = i.split(": ")
-                data_type = item[0]
-                value = item[1].replace(" |", "")
-                if data_type in supported_types:
-                    # TODO refactor json body use " coutes and parse int
-                    if data_type == "uuid":
-                        set_uuid(value)
-                    else:
-                        data[data_type] = rework_types(value)
+                try:
+                    item = i.split(": ")
+                    data_type = item[0]
+                    value = item[1].replace(" |", "")
+                    if data_type in supported_types:
+                        # TODO refactor json body use " coutes and parse int
+                        if data_type == "uuid":
+                            set_uuid(value)
+                        else:
+                            data[data_type] = rework_types(value)
+                except IndexError as err:
+                    print(err)
             if active_uuid != "":
                 dataset.append(data)
 
@@ -67,9 +70,10 @@ def send_data_to_server():
 
 
 def loop():
-    get_data_from_arduino()
-    if len(dataset) >= 20:
-        send_data_to_server()
+    if ser is not None:
+        get_data_from_arduino()
+        if len(dataset) >= 20:
+            send_data_to_server()
 
 
 def initialize_serial():
@@ -86,5 +90,4 @@ def initialize_serial():
 if __name__ == '__main__':
     initialize_serial()
     while True:
-        if ser is not None:
-            loop()
+        loop()
