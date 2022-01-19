@@ -38,7 +38,6 @@ def get_data_from_arduino():
                     data_type = item[0]
                     value = item[1].replace(" |", "")
                     if data_type in supported_types:
-                        # TODO refactor json body use " coutes and parse int
                         if data_type == "uuid":
                             set_uuid(value)
                         else:
@@ -66,7 +65,6 @@ def send_data_to_server():
     if r.status_code == 201:
         print("Data has been send to server")
         dataset = []
-    # dataset = []
 
 
 def loop():
